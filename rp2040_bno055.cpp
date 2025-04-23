@@ -97,6 +97,56 @@ int8_t BNO055::getTemp() {
     return (int8_t)(read(BNO055_TEMP_ADDR));
 }
 
+void BNO055::getVector(vector_type_t vector_type, vector *v) {
+    uint8_t buffer[6];
+    memset(buffer, 0, 6);
+    int16_t x, y, z = 0;
+
+    readBuffer((bno055_reg_t)vector_type, buffer, 6);
+    x = ((int16_t)buffer[0]) | (((int16_t)buffer[1]) << 8);
+    y = ((int16_t)buffer[2]) | (((int16_t)buffer[3]) << 8);
+    z = ((int16_t)buffer[4]) | (((int16_t)buffer[5]) << 8);
+
+    switch (vector_type) {
+        
+        case VECTOR_MAGNETOMETER:
+            v->x = ((double)x) / 16.0;
+            v->y = ((double)y) / 16.0;
+            v->z = ((double)z) / 16.0;
+            break;
+        
+        case VECTOR_GYROSCOPE:
+            v->x = ((double)x) / 16.0;
+            v->y = ((double)y) / 16.0;
+            v->z = ((double)z) / 16.0;
+            break;
+
+        case VECTOR_EULER:
+            v->x = ((double)x) / 16.0;
+            v->y = ((double)y) / 16.0;
+            v->z = ((double)z) / 16.0;
+            break;
+
+        case VECTOR_ACCELEROMETER:
+            v->x = ((double)x) / 100.0;
+            v->y = ((double)y) / 100.0;
+            v->z = ((double)z) / 100.0;
+            break;
+
+        case VECTOR_LINEARACCEL:
+            v->x = ((double)x) / 100.0;
+            v->y = ((double)y) / 100.0;
+            v->z = ((double)z) / 100.0;
+            break;
+
+        case VECTOR_GRAVITY:
+            v->x = ((double)x) / 100.0;
+            v->y = ((double)y) / 100.0;
+            v->z = ((double)z) / 100.0;
+            break;
+    }
+}
+
 //////////////////////////
 // Private class functions
 //////////////////////////

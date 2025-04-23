@@ -1,5 +1,6 @@
 #pragma once
 #include <stdio.h>
+#include <string.h>
 #include <cstdint>
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
