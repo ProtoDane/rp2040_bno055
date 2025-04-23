@@ -170,13 +170,28 @@ typedef enum {
     ACCEL_RADIUS_MSB_ADDR = 0X68,
     MAG_RADIUS_LSB_ADDR = 0X69,
     MAG_RADIUS_MSB_ADDR = 0X6A
-  } bno055_reg_t;
+} bno055_reg_t;
 
 typedef enum {
-POWER_MODE_NORMAL = 0X00,
-POWER_MODE_LOWPOWER = 0X01,
-POWER_MODE_SUSPEND = 0X02
+    POWER_MODE_NORMAL = 0X00,
+    POWER_MODE_LOWPOWER = 0X01,
+    POWER_MODE_SUSPEND = 0X02
 } bno055_powermode_t;
+
+typedef enum {
+    VECTOR_ACCELEROMETER = BNO055_ACCEL_DATA_X_LSB_ADDR,
+    VECTOR_MAGNETOMETER = BNO055_MAG_DATA_X_LSB_ADDR,
+    VECTOR_GYROSCOPE = BNO055_GYRO_DATA_X_LSB_ADDR,
+    VECTOR_EULER = BNO055_EULER_H_LSB_ADDR,
+    VECTOR_LINEARACCEL = BNO055_LINEAR_ACCEL_DATA_X_LSB_ADDR,
+    VECTOR_GRAVITY = BNO055_GRAVITY_DATA_X_LSB_ADDR
+} vector_type_t;
+
+typedef struct {
+    double x;
+    double y;
+    double z;
+} vector;
 
 class BNO055 {
 
@@ -191,6 +206,7 @@ class BNO055 {
         void getSystemStatus(uint8_t *system_status, uint8_t *self_test_result, uint8_t *system_error);
 
         int8_t getTemp();
+        void getVector(vector_type_t vector_type, vector *v);
 
     private:
         i2c_inst_t *_i2c_port;
@@ -200,5 +216,6 @@ class BNO055 {
 
         void write(bno055_reg_t reg);
         void write(bno055_reg_t reg, uint8_t value);
-        void read(uint8_t *buffer, int len);
+        uint8_t read(bno055_reg_t reg);
+        void readBuffer(bno055_reg_t reg, uint8_t *buffer, int len);
 };

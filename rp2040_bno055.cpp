@@ -2,7 +2,7 @@
     Library for retrieving data from the Adafruit BNO-055 sensor via I2C
     on Pimoroni Servo2040 (or other RP2040 boards, e.g. RaspPi Pico).
 
-    Adapted from BNO055-RP2040-Library by Aryan Kapoor
+    Adapted from Adafruit BNO055 library for Arduino core and BNO055-RP2040-Library by Aryan Kapoor
 */
 
 #include "rp2040_bno055.hpp"
@@ -26,12 +26,7 @@ bool BNO055::begin(bno055_opmode_t mode) {
 
     sleep_ms(1000);
 
-    uint8_t chipID[1];
-
-    write(BNO055_CHIP_ID_ADDR);
-    read(chipID, 1);
-
-    if (chipID[0] != BNO055_ID) {
+    if (read(BNO055_CHIP_ID_ADDR) != BNO055_ID) {
         return false;
     }
 
@@ -39,15 +34,7 @@ bool BNO055::begin(bno055_opmode_t mode) {
 
     write(BNO055_SYS_TRIGGER_ADDR, 0x20);
     sleep_ms(30);
-    while (true) {
-        uint8_t buf[1];
-        write(BNO055_CHIP_ID_ADDR);
-        read(buf, 1);
-        
-        if (buf[0] == BNO055_ID) {
-            break;
-        }
-
+    while (read(BNO055_CHIP_ID_ADDR) != BNO055_ID) {
         sleep_ms(10);
     }
     sleep_ms(50);
@@ -73,10 +60,7 @@ void BNO055::setMode(bno055_opmode_t mode) {
 }
 
 bno055_opmode_t BNO055::getMode() {
-    uint8_t buf[1];
-    write(BNO055_OPR_MODE_ADDR);
-    read(buf, 1);
-    return (bno055_opmode_t)buf[0];
+    return (bno055_opmode_t)read(BNO055_OPR_MODE_ADDR);
 }
 
 void BNO055::setExtCrystalUse(bool usextal) {
@@ -96,6 +80,27 @@ void BNO055::setExtCrystalUse(bool usextal) {
     sleep_ms(20);
 }
 
+void BNO055::getSystemStatus(uint8_t *system_status, uint8_t *self_test_result, uint8_t *system_error) {
+
+    write(BNO055_PAGE_ID_ADDR, 0);
+
+    if (system_status != 0) *system_status = read(BNO055_SYS_STAT_ADDR);
+    
+    if (self_test_result != 0) *self_test_result = read(BNO055_SELFTEST_RESULT_ADDR);
+
+    if (system_error != 0) *system_error = read(BNO055_SYS_ERR_ADDR);
+
+    sleep_ms(200);
+}
+
+int8_t BNO055::getTemp() {
+    return (int8_t)(read(BNO055_TEMP_ADDR));
+}
+
+//////////////////////////
+// Private class functions
+//////////////////////////
+
 void BNO055::write(bno055_reg_t reg) {
     i2c_write_blocking(_i2c_port, BNO055_I2C_ADDR, (const uint8_t*)&reg, 1, true);
 }
@@ -105,6 +110,14 @@ void BNO055::write(bno055_reg_t reg, uint8_t value) {
     i2c_write_blocking(_i2c_port, BNO055_I2C_ADDR, buffer, 2, true);
 }
 
-void BNO055::read(uint8_t *buffer, int len) {
+uint8_t BNO055::read(bno055_reg_t reg) {
+    uint8_t buf[1];
+    write(reg);
+    i2c_read_blocking(_i2c_port, BNO055_I2C_ADDR, buf, 1, false);
+    return buf[0];
+}
+
+void BNO055::readBuffer(bno055_reg_t reg, uint8_t *buffer, int len) {
+    write(reg);
     i2c_read_blocking(_i2c_port, BNO055_I2C_ADDR, buffer, len, false);
 }
