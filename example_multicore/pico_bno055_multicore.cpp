@@ -52,7 +52,8 @@ void core1_main() {
             fifo_push_double(v.z);
         }
         imu.getVector(VECTOR_EULER, &v);
-        sleep_ms(20);
+        // sleep_ms(5);
+        sleep_us(500);
     }
 }
 
@@ -86,13 +87,16 @@ int main() {
         sleep_ms(500);
         gpio_put(PICO_DEFAULT_LED_PIN, 1);
 
+        uint64_t start = time_us_64();
         multicore_fifo_push_blocking(0x01);
         vector v;
         v.x = fifo_pop_double();
         v.y = fifo_pop_double();
         v.z = fifo_pop_double();
+        uint64_t end = time_us_64();
+        uint64_t duration = end - start;
 
-        printf("Euler | YAW: %.2lf PITCH: %.2lf ROLL: %.2lf\n", v.x, v.y, v.z);
+        printf("Euler | YAW: %.2lf PITCH: %.2lf ROLL: %.2lf | (%d us)\n", v.x, v.y, v.z, duration);
     }
 
 }
