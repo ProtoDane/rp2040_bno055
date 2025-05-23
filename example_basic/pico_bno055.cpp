@@ -41,9 +41,11 @@ int main() {
             
             // imu.getVector(VECTOR_GYROSCOPE, &v);
             // printf("Gyro | X: %.2lf Y: %.2lf Z: %.2lf\n", v.x, v.y, v.z);
-            
+            uint64_t start = time_us_64();
             imu.getVector(VECTOR_EULER, &v);
-            printf("Euler | YAW: %.2lf PITCH: %.2lf ROLL: %.2lf\n", v.x, v.y, v.z);
+            uint64_t end = time_us_64();
+            uint64_t duration = end - start;
+            printf("Euler | YAW: %.2lf PITCH: %.2lf ROLL: %.2lf | (%d us)\n", v.x, v.y, v.z, duration);
 
             sleep_ms(1000);
         }
